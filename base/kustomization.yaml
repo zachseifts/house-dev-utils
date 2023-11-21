@@ -4,3 +4,4 @@ metadata:
   name: house-dev-utils
 resources:
  - namespace.yaml
+ - house-dev-utils.yaml

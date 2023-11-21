@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: house-dev-utils-service
+  labels:
+    component: house-dev-utils
+spec:
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+    nodePort: 30020
+  selector:
+    component: house-dev-utils
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: house-dev-utils-deployment
+  labels:
+    component: house-dev-utils
+spec:
+  selector:
+    matchLabels:
+      component: house-dev-utils
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: house-dev-utils
+    spec:
+      containers:
+        - name: house-dev-utils-image
+          image: redis:alpine
+          command:
+            - redis-server
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - mountPath: /redis-data
+              name: house-dev-utils-image-data
+      volumes:
+        - name: house-dev-utils-image-data
+          emptyDir: {}
