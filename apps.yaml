@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: house-dev-utils
+  namespace: argocd
+spec:
+  description: An argocd app project for hosting a local house-dev-utils instance
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+  - name: '*'
+    namespace: '*'
+    server: https://kubernetes.default.svc
+  sourceRepos:
+  - https://github.com/zachseifts/house-dev-utils-deploy.git
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: house-dev-utils
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/zachseifts/house-dev-utils-deploy.git
+      revision: HEAD
+      directories:
+        - path: overlays/*
+  template:
+    metadata:
+      name: 'house-dev-utils-{{path.basename}}'
+    spec:
+      project: house-dev-utils
+      source:
+        repoURL: https://github.com/zachseifts/house-dev-utils-deploy.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'house-dev-utils-{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
